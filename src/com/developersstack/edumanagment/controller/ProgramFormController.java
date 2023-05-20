@@ -47,6 +47,7 @@ public class ProgramFormController {
     public TableColumn colOption;
 
     String searchText = "";
+    ObservableList<TechAddTm> techList = FXCollections.observableArrayList();
 
 
 
@@ -99,10 +100,18 @@ public class ProgramFormController {
                 TechAddTm techAddTm = new TechAddTm(
                         i+1,stringArray[i],btn
                 );
-                oblist2.add(techAddTm);
+                btn.setOnAction(event -> {
+                    Alert  alert = new Alert(Alert.AlertType.CONFIRMATION,"Are you sure?",ButtonType.YES,ButtonType.NO);
+                    Optional<ButtonType> buttonType = alert.showAndWait();
+                    if(buttonType.get().equals(ButtonType.YES)){
+                        techList.remove(techAddTm);
+                    }
+
+                });
+                techList.add(techAddTm);
 
             }
-            tblTechnology.setItems(oblist2);
+            tblTechnology.setItems(techList);
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -145,6 +154,7 @@ public class ProgramFormController {
         clear();
         setProgramID();
         btn1.setText("Save");
+        cmbTeacher.setPromptText("Teacher");
     }
 
     public void saveOnAction(ActionEvent actionEvent) {
@@ -157,22 +167,23 @@ public class ProgramFormController {
             techArray[position] = tec.getName();
             position++;
         }
-
+        Program program = new Program(
+                txtID.getText(),
+                txtName.getText(),
+                Double.parseDouble(txtCost.getText()),
+                cmbTeacher.getValue().toString(),
+                Arrays.toString(techArray)
+        );
 
         if (btn1.getText().equals("Save")) {
 
-            Program program = new Program(
-                    txtID.getText(),
-                    txtName.getText(),
-                    Double.parseDouble(txtCost.getText()),
-                    cmbTeacher.getValue().toString(),//.split("\\.")[0],
-                    Arrays.toString(techArray)
-            );
+
             try {
                 if (saveProgram(program)) {
                     setProgramData(searchText);
                     clear();
                     setProgramID();
+                    new Alert(Alert.AlertType.INFORMATION,"Program Saved").show();
                 } else {
                     new Alert(Alert.AlertType.WARNING, "Try Again!").show();
                 }
@@ -180,7 +191,21 @@ public class ProgramFormController {
                 e.printStackTrace();
             }
         }else {
-            //update Parts should be filled
+            try {
+                if(updateProgram(program)){
+                    setProgramData(searchText);
+                    clear();
+                    setProgramID();
+                    btn1.setText("Save");
+                    cmbTeacher.setPromptText("Teacher");
+                    new Alert(Alert.AlertType.INFORMATION,"Program Updated").show();
+                }else {
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
+            } catch (ClassNotFoundException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
@@ -240,7 +265,6 @@ public class ProgramFormController {
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("../view/"+location+".fxml"))));
         stage.centerOnScreen();
     }
-    ObservableList<TechAddTm> techList = FXCollections.observableArrayList();
     public void techAddOnAction(ActionEvent actionEvent) {
         if(!isExists(txtTechnology.getText().trim())){
             Button btn = new Button("Delete");
@@ -352,5 +376,18 @@ public class ProgramFormController {
             return resultSet.getString(4);
         }
         return null;
+    }
+    private boolean updateProgram(Program program) throws ClassNotFoundException, SQLException {
+
+        Connection connection = DbConnection.getInstance().getConnection();
+        String sql = "UPDATE program SET name=?,cost=?,technology_array=?,teacher_teacher_id= ? WHERE program_code=?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1,program.getProgramName());
+        statement.setDouble(2,program.getCost());
+        statement.setString(3,program.getTechnology());
+        statement.setString(4,program.getTeacherID());
+        statement.setString(5,program.getProgramCode());
+        return statement.executeUpdate()>0;
+
     }
 }

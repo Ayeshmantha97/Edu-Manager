@@ -6,9 +6,9 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-
 
 <AnchorPane fx:id="contaxt" prefHeight="216.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.developersstack.edumanagment.controller.RegistrationFormController">
    <children>
@@ -44,12 +44,15 @@
             <Font size="13.0" />
          </font>
       </Label>
-      <RadioButton fx:id="rbnPaid" layoutX="27.0" layoutY="133.0" mnemonicParsing="false" selected="true" text="Paid">
+      <RadioButton fx:id="rbnPaid" layoutX="27.0" layoutY="133.0" mnemonicParsing="false" text="Paid">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>
+         <toggleGroup>
+            <ToggleGroup fx:id="payment_state" />
+         </toggleGroup>
       </RadioButton>
-      <RadioButton layoutX="102.0" layoutY="133.0" mnemonicParsing="false" text="Pending">
+      <RadioButton layoutX="102.0" layoutY="133.0" mnemonicParsing="false" selected="true" text="Pending" toggleGroup="$payment_state">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>
